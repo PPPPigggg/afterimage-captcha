@@ -27,6 +27,19 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  playground:
+    dependencies:
+      afterimage-captcha:
+        specifier: workspace:*
+        version: link:..
+    devDependencies:
+      '@rsbuild/core':
+        specifier: ^2.1.5
+        version: 2.1.5
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
 packages:
 
   '@ast-grep/napi-darwin-arm64@0.37.0':

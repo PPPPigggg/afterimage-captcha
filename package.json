@@ -18,8 +18,11 @@
   "scripts": {
     "build": "rslib",
     "check": "biome check --write",
-    "dev": "rslib --watch",
+    "dev": "rslib --watch --no-clean",
+    "dev:all": "pnpm build && pnpm --parallel --recursive --include-workspace-root dev",
     "format": "biome format --write",
+    "playground": "pnpm --dir playground dev",
+    "playground:build": "pnpm --dir playground build",
     "test": "rstest",
     "test:watch": "rstest --watch"
   },
