@@ -8,4 +8,15 @@ export default defineConfig({
   output: {
     target: 'web',
   },
+  server: {
+    host: '127.0.0.1',
+    port: 3000,
+  },
+  tools: {
+    rspack: {
+      watchOptions: {
+        ignored: ['**/.playwright-cli/**', '**/output/**', '**/dist/**'],
+      },
+    },
+  },
 });

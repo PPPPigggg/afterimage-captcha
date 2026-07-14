@@ -3,11 +3,133 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Afterimage Captcha Playground</title>
+    <meta name="theme-color" content="#e9edf0" />
+    <title>Afterimage Captcha Lab</title>
   </head>
   <body>
-    <main>
-      <h1>afterimage-captcha playground</h1>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">AC</span>
+        <span>
+          <strong>Afterimage</strong>
+          <small>APNG captcha lab</small>
+        </span>
+      </div>
+      <output class="status" id="status" aria-live="polite">Ready</output>
+    </header>
+
+    <main class="workspace">
+      <section class="preview-pane" aria-label="Captcha preview">
+        <div class="preview-heading">
+          <div>
+            <p class="eyebrow">Live output</p>
+            <h1>Persistence viewer</h1>
+          </div>
+          <div class="answer-readout">
+            <span>Answer</span>
+            <strong id="answer">-----</strong>
+          </div>
+        </div>
+
+        <div class="display-shell">
+          <div class="display-labels" aria-hidden="true">
+            <span id="mode-label">ANIMATED APNG</span>
+            <span id="dimensions-label">220 x 80</span>
+          </div>
+          <div class="captcha-stage">
+            <img id="animated-preview" alt="Generated animated captcha" />
+            <canvas id="frame-preview" hidden aria-label="Selected captcha frame"></canvas>
+          </div>
+          <div class="transport">
+            <div class="segmented" aria-label="Preview mode">
+              <button class="mode-button active" type="button" data-mode="animated" aria-pressed="true">
+                Animated
+              </button>
+              <button class="mode-button" type="button" data-mode="frame" aria-pressed="false">
+                Single frame
+              </button>
+            </div>
+            <div class="frame-nav" id="frame-nav" hidden>
+              <button type="button" class="icon-button" id="previous-frame" title="Previous frame" aria-label="Previous frame">&larr;</button>
+              <output id="frame-counter">01 / 08</output>
+              <button type="button" class="icon-button" id="next-frame" title="Next frame" aria-label="Next frame">&rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <dl class="metrics">
+          <div><dt>Frames</dt><dd id="metric-frames">8</dd></div>
+          <div><dt>Cycle</dt><dd id="metric-cycle">600 ms</dd></div>
+          <div><dt>Reveal</dt><dd id="metric-signal">100%</dd></div>
+          <div><dt>Payload</dt><dd id="metric-size">0 KB</dd></div>
+        </dl>
+
+        <div class="commands">
+          <button class="primary-command" id="regenerate" type="button">Regenerate</button>
+          <button class="secondary-command" id="download" type="button">Download APNG</button>
+        </div>
+      </section>
+
+      <aside class="control-pane" aria-label="Captcha options">
+        <form id="options-form">
+          <fieldset>
+            <legend>Code</legend>
+            <label>
+              <span>Text <small>blank = random</small></span>
+              <input id="text" name="text" maxlength="12" autocomplete="off" spellcheck="false" placeholder="R7K2M" />
+            </label>
+            <div class="split-fields">
+              <label><span>Width</span><input id="width" name="width" type="number" min="120" max="500" value="220" /></label>
+              <label><span>Height</span><input id="height" name="height" type="number" min="48" max="240" value="80" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Timing</legend>
+            <label class="range-field">
+              <span>Frames <output id="frames-value">8</output></span>
+              <input id="frames" name="frames" type="range" min="4" max="16" step="2" value="8" />
+            </label>
+            <label class="range-field">
+              <span>Frame duration <output id="duration-value">50 ms</output></span>
+              <input id="duration" name="duration" type="range" min="20" max="160" step="5" value="50" />
+            </label>
+            <label class="range-field">
+              <span>Signal strength <output id="strength-value">100%</output></span>
+              <input id="strength" name="strength" type="range" min="25" max="100" value="100" />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Interference</legend>
+            <label class="range-field">
+              <span>Temporal noise <output id="noise-value">1%</output></span>
+              <input id="noise" name="noise" type="range" min="0" max="20" value="1" />
+            </label>
+            <label class="range-field">
+              <span>Snow refresh <output id="refresh-value">12%</output></span>
+              <input id="refresh" name="refresh" type="range" min="0" max="100" value="12" />
+            </label>
+            <label class="range-field">
+              <span>Snow grain <output id="grain-value">2 px</output></span>
+              <input id="grain" name="grain" type="range" min="1" max="6" value="2" />
+            </label>
+            <label class="range-field">
+              <span>Character jitter <output id="jitter-value">1</output></span>
+              <input id="jitter" name="jitter" type="range" min="0" max="3" value="1" />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Palette</legend>
+            <div class="color-grid">
+              <label><span>Dark snow</span><input id="dark-color" type="color" value="#0a0d0e" /></label>
+              <label><span>Light snow</span><input id="light-color" type="color" value="#eef2f3" /></label>
+            </div>
+          </fieldset>
+        </form>
+        <p class="error-message" id="error-message" role="alert" hidden></p>
+      </aside>
     </main>
   </body>
 </html>

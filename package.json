@@ -1,6 +1,7 @@
 {
   "name": "afterimage-captcha",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "Generate visual-persistence APNG captchas from complementary television snow frames.",
   "type": "module",
   "exports": {
     ".": {
@@ -9,9 +10,23 @@
     }
   },
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "LICENSE",
+    "README.md"
   ],
+  "keywords": [
+    "captcha",
+    "apng",
+    "afterimage",
+    "ocr",
+    "visual-persistence"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -21,9 +36,10 @@
     "dev": "rslib --watch --no-clean",
     "dev:all": "pnpm build && pnpm --parallel --recursive --include-workspace-root dev",
     "format": "biome format --write",
+    "lint": "biome check .",
     "playground": "pnpm --dir playground dev",
     "playground:build": "pnpm --dir playground build",
-    "test": "rstest",
+    "test": "rstest run",
     "test:watch": "rstest --watch"
   },
   "devDependencies": {
@@ -32,7 +48,7 @@
     "@rstest/adapter-rslib": "^0.10.6",
     "@rstest/core": "^0.10.6",
     "@types/node": "^24.13.2",
+    "fflate": "^0.8.3",
     "typescript": "^6.0.3"
-  },
-  "private": true
+  }
 }
