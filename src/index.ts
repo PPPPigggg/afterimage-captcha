@@ -1,10 +1,13 @@
-import { bytesToDataUrl, encodeApng } from './apng';
+export { createCaptchaPlayer } from './canvas';
+
 import { renderCaptcha } from './render';
 import type { CaptchaOptions, CaptchaResult } from './types';
 
 export { DEFAULT_CHARSET } from './glyphs';
 export type {
   BitmapGlyph,
+  CaptchaCanvasPlayer,
+  CaptchaCanvasPlayerOptions,
   CaptchaFrame,
   CaptchaOptions,
   CaptchaResult,
@@ -18,34 +21,13 @@ export const generateCaptcha = (
   options: CaptchaOptions = {},
 ): CaptchaResult => {
   const rendered = renderCaptcha(options);
-  const {
-    width,
-    height,
-    frameCount,
-    frameDuration,
-    loopCount,
-    palette,
-    answer,
-  } = rendered.options;
-  const bytes = encodeApng({
-    width,
-    height,
-    frameDuration,
-    loopCount,
-    palette,
-    frames: rendered.frames,
-  });
+  const { width, height, frameCount, palette, answer } = rendered.options;
 
   return {
     answer,
-    bytes,
-    dataUrl: bytesToDataUrl(bytes),
-    mimeType: 'image/apng',
     width,
     height,
     frameCount,
-    frameDuration,
-    loopCount,
     palette,
     frames: rendered.frames,
   };

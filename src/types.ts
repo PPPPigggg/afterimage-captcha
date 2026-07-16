@@ -21,9 +21,9 @@ export interface CaptchaOptions {
   scale?: number | 'auto';
   characterSpacing?: number;
   characterJitter?: number;
+  signalSpread?: number;
+  signalQuietZone?: number;
   frameCount?: number;
-  frameDuration?: number;
-  loopCount?: number;
   grainSize?: number;
   signalStrength?: number;
   temporalNoiseDensity?: number;
@@ -41,16 +41,26 @@ export interface CaptchaFrame {
 
 export interface CaptchaResult {
   answer: string;
-  bytes: Uint8Array;
-  dataUrl: string;
-  mimeType: 'image/apng';
   width: number;
   height: number;
   frameCount: number;
-  frameDuration: number;
-  loopCount: number;
   palette: readonly RgbaColor[];
   frames: readonly CaptchaFrame[];
+}
+
+export interface CaptchaCanvasPlayerOptions {
+  autoStart?: boolean;
+  onRefreshRateChange?: (refreshRate: number) => void;
+}
+
+export interface CaptchaCanvasPlayer {
+  readonly currentFrame: number;
+  readonly refreshRate: number | null;
+  readonly running: boolean;
+  start(): void;
+  stop(): void;
+  drawFrame(frameIndex: number): void;
+  destroy(): void;
 }
 
 export class CaptchaOptionError extends Error {

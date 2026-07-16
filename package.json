@@ -1,7 +1,7 @@
 {
   "name": "afterimage-captcha",
   "version": "0.1.0",
-  "description": "Generate visual-persistence APNG captchas from complementary television snow frames.",
+  "description": "Generate display-synced Canvas captchas from complementary television snow frames.",
   "type": "module",
   "exports": {
     ".": {
@@ -18,7 +18,8 @@
   ],
   "keywords": [
     "captcha",
-    "apng",
+    "canvas",
+    "requestanimationframe",
     "afterimage",
     "ocr",
     "visual-persistence"
@@ -48,7 +49,6 @@
     "@rstest/adapter-rslib": "^0.10.6",
     "@rstest/core": "^0.10.6",
     "@types/node": "^24.13.2",
-    "fflate": "^0.8.3",
     "typescript": "^6.0.3"
   }
 }

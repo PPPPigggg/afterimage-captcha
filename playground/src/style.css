@@ -190,7 +190,6 @@ h1 {
   background-size: 6px 6px;
 }
 
-.captcha-stage img,
 .captcha-stage canvas {
   width: min(100%, 620px);
   height: auto;
@@ -302,8 +301,7 @@ input:focus-visible {
   gap: 10px;
 }
 
-.primary-command,
-.secondary-command {
+.primary-command {
   min-height: 42px;
   padding: 0 18px;
   border: 1px solid var(--ink);
@@ -317,17 +315,8 @@ input:focus-visible {
   color: #fff;
 }
 
-.secondary-command {
-  background: #fff;
-  color: var(--ink);
-}
-
 .primary-command:hover {
   background: var(--signal);
-}
-
-.secondary-command:hover {
-  background: #edf7f6;
 }
 
 .control-pane {
@@ -517,11 +506,10 @@ input[type="color"] {
 
   .commands {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
-  .primary-command,
-  .secondary-command {
+  .primary-command {
     padding: 0 10px;
   }
 

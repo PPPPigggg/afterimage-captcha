@@ -1,4 +1,5 @@
 import { BUILTIN_GLYPHS, DEFAULT_CHARSET } from './glyphs';
+import { coherentProbability, PerlinNoise2D } from './perlin';
 import { RandomPool } from './random';
 import {
   type BitmapGlyph,
@@ -17,9 +18,9 @@ interface ResolvedOptions {
   scale: number;
   characterSpacing: number;
   characterJitter: number;
+  signalSpread: number;
+  signalQuietZone: number;
   frameCount: number;
-  frameDuration: number;
-  loopCount: number;
   grainSize: number;
   signalStrength: number;
   temporalNoiseDensity: number;
@@ -33,6 +34,7 @@ export interface RenderOutput {
   frames: CaptchaFrame[];
   pairDifferenceMasks: Uint8Array[];
   compositeSignalMask: Uint8Array;
+  stabilityMask: Uint8Array;
 }
 
 const integerOption = (
@@ -175,13 +177,25 @@ const resolveOptions = (
   const grainSize = integerOption('grainSize', options.grainSize ?? 2, 1, 8);
   const characterSpacing = integerOption(
     'characterSpacing',
-    options.characterSpacing ?? 1,
+    options.characterSpacing ?? 2,
     0,
     16,
   );
   const characterJitter = integerOption(
     'characterJitter',
-    options.characterJitter ?? 1,
+    options.characterJitter ?? 0,
+    0,
+    4,
+  );
+  const signalSpread = integerOption(
+    'signalSpread',
+    options.signalSpread ?? 1,
+    0,
+    2,
+  );
+  const signalQuietZone = integerOption(
+    'signalQuietZone',
+    options.signalQuietZone ?? 1,
     0,
     4,
   );
@@ -201,8 +215,8 @@ const resolveOptions = (
   );
   const autoScale = Math.floor(
     Math.min(
-      availableWidthInGrains / layoutWidth,
-      availableHeightInGrains / layoutHeight,
+      (availableWidthInGrains - signalSpread * 2) / layoutWidth,
+      (availableHeightInGrains - signalSpread * 2) / layoutHeight,
     ),
   );
   const scale =
@@ -211,8 +225,8 @@ const resolveOptions = (
       : integerOption('scale', options.scale, 1, 32);
   if (
     scale < 1 ||
-    layoutWidth * scale > availableWidthInGrains ||
-    layoutHeight * scale > availableHeightInGrains
+    layoutWidth * scale + signalSpread * 2 > availableWidthInGrains ||
+    layoutHeight * scale + signalSpread * 2 > availableHeightInGrains
   ) {
     throw new CaptchaOptionError(
       'The text does not fit within the requested dimensions and padding.',
@@ -244,14 +258,9 @@ const resolveOptions = (
     scale,
     characterSpacing,
     characterJitter,
+    signalSpread,
+    signalQuietZone,
     frameCount,
-    frameDuration: integerOption(
-      'frameDuration',
-      options.frameDuration ?? 50,
-      20,
-      2000,
-    ),
-    loopCount: integerOption('loopCount', options.loopCount ?? 0, 0, 65_535),
     grainSize,
     signalStrength: numberOption(
       'signalStrength',
@@ -261,13 +270,13 @@ const resolveOptions = (
     ),
     temporalNoiseDensity: numberOption(
       'temporalNoiseDensity',
-      options.temporalNoiseDensity ?? 0.01,
+      options.temporalNoiseDensity ?? 0.005,
       0,
       0.5,
     ),
     snowRefreshRate: numberOption(
       'snowRefreshRate',
-      options.snowRefreshRate ?? 0.12,
+      options.snowRefreshRate ?? 0.04,
       0,
       1,
     ),
@@ -341,11 +350,57 @@ const createSignalMask = (
   return mask;
 };
 
+const expandMask = (
+  source: Uint8Array,
+  width: number,
+  height: number,
+  grainSize: number,
+  radius: number,
+): Uint8Array => {
+  if (radius === 0) return source;
+  const expanded = source.slice();
+  const pixelRadius = radius * grainSize;
+
+  for (let y = 0; y < height; y += grainSize) {
+    for (let x = 0; x < width; x += grainSize) {
+      const centerY = Math.min(y + Math.floor(grainSize / 2), height - 1);
+      const centerX = Math.min(x + Math.floor(grainSize / 2), width - 1);
+      if (source[centerY * width + centerX] !== 1) continue;
+      fillBlock(
+        expanded,
+        width,
+        height,
+        x - pixelRadius,
+        y - pixelRadius,
+        grainSize + pixelRadius * 2,
+        1,
+      );
+    }
+  }
+
+  return expanded;
+};
+
 export const renderCaptcha = (options: CaptchaOptions = {}): RenderOutput => {
   const random = new RandomPool(options.randomSource);
   const resolved = resolveOptions(options, random);
+  const interference = new PerlinNoise2D(random);
   const { width, height, grainSize, frameCount } = resolved;
-  const compositeSignalMask = createSignalMask(resolved, random);
+  const glyphMask = createSignalMask(resolved, random);
+  const compositeSignalMask = expandMask(
+    glyphMask,
+    width,
+    height,
+    grainSize,
+    resolved.signalSpread,
+  );
+  const stabilityMask = expandMask(
+    compositeSignalMask,
+    width,
+    height,
+    grainSize,
+    resolved.signalQuietZone,
+  );
   const frames: CaptchaFrame[] = [];
   const pairDifferenceMasks: Uint8Array[] = [];
   const baseSnow = new Uint8Array(width * height);
@@ -360,7 +415,19 @@ export const renderCaptcha = (options: CaptchaOptions = {}): RenderOutput => {
         const maskIndex =
           Math.min(y + Math.floor(grainSize / 2), height - 1) * width +
           Math.min(x + Math.floor(grainSize / 2), width - 1);
-        if (pairIndex === 0 || random.float() < resolved.snowRefreshRate) {
+        const isSignal = compositeSignalMask[maskIndex] === 1;
+        const isStable = stabilityMask[maskIndex] === 1;
+        const fieldX = x / grainSize / 10 + pairIndex * 0.67;
+        const fieldY = y / grainSize / 10 - pairIndex * 0.43;
+        const fieldValue = interference.sample(fieldX, fieldY);
+        const refreshProbability = coherentProbability(
+          resolved.snowRefreshRate,
+          fieldValue,
+        );
+        if (
+          pairIndex === 0 ||
+          (!isStable && random.float() < refreshProbability)
+        ) {
           fillBlock(
             baseSnow,
             width,
@@ -372,10 +439,13 @@ export const renderCaptcha = (options: CaptchaOptions = {}): RenderOutput => {
           );
         }
         const base = baseSnow[maskIndex] ?? 0;
-        const isSignal = compositeSignalMask[maskIndex] === 1;
+        const noiseProbability = coherentProbability(
+          resolved.temporalNoiseDensity,
+          1 - fieldValue,
+        );
         const flip = isSignal
           ? random.float() < resolved.signalStrength
-          : random.float() < resolved.temporalNoiseDensity;
+          : !isStable && random.float() < noiseProbability;
 
         fillBlock(first, width, height, x, y, grainSize, base);
         fillBlock(
@@ -400,5 +470,6 @@ export const renderCaptcha = (options: CaptchaOptions = {}): RenderOutput => {
     frames,
     pairDifferenceMasks,
     compositeSignalMask,
+    stabilityMask,
   };
 };

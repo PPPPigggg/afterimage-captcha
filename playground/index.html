@@ -12,7 +12,7 @@
         <span class="brand-mark" aria-hidden="true">AC</span>
         <span>
           <strong>Afterimage</strong>
-          <small>APNG captcha lab</small>
+          <small>Canvas captcha lab</small>
         </span>
       </div>
       <output class="status" id="status" aria-live="polite">Ready</output>
@@ -33,12 +33,11 @@
 
         <div class="display-shell">
           <div class="display-labels" aria-hidden="true">
-            <span id="mode-label">ANIMATED APNG</span>
+            <span id="mode-label">DISPLAY-SYNCED CANVAS</span>
             <span id="dimensions-label">220 x 80</span>
           </div>
           <div class="captcha-stage">
-            <img id="animated-preview" alt="Generated animated captcha" />
-            <canvas id="frame-preview" hidden aria-label="Selected captcha frame"></canvas>
+            <canvas id="captcha-preview" aria-label="Generated animated captcha"></canvas>
           </div>
           <div class="transport">
             <div class="segmented" aria-label="Preview mode">
@@ -59,14 +58,13 @@
 
         <dl class="metrics">
           <div><dt>Frames</dt><dd id="metric-frames">8</dd></div>
-          <div><dt>Cycle</dt><dd id="metric-cycle">600 ms</dd></div>
+          <div><dt>Refresh</dt><dd id="metric-refresh">Detecting</dd></div>
           <div><dt>Reveal</dt><dd id="metric-signal">100%</dd></div>
-          <div><dt>Payload</dt><dd id="metric-size">0 KB</dd></div>
+          <div><dt>Driver</dt><dd id="metric-driver">rAF</dd></div>
         </dl>
 
         <div class="commands">
           <button class="primary-command" id="regenerate" type="button">Regenerate</button>
-          <button class="secondary-command" id="download" type="button">Download APNG</button>
         </div>
       </section>
 
@@ -85,14 +83,10 @@
           </fieldset>
 
           <fieldset>
-            <legend>Timing</legend>
+            <legend>Animation</legend>
             <label class="range-field">
               <span>Frames <output id="frames-value">8</output></span>
               <input id="frames" name="frames" type="range" min="4" max="16" step="2" value="8" />
-            </label>
-            <label class="range-field">
-              <span>Frame duration <output id="duration-value">50 ms</output></span>
-              <input id="duration" name="duration" type="range" min="20" max="160" step="5" value="50" />
             </label>
             <label class="range-field">
               <span>Signal strength <output id="strength-value">100%</output></span>
@@ -103,20 +97,28 @@
           <fieldset>
             <legend>Interference</legend>
             <label class="range-field">
-              <span>Temporal noise <output id="noise-value">1%</output></span>
-              <input id="noise" name="noise" type="range" min="0" max="20" value="1" />
+              <span>Temporal noise <output id="noise-value">0.5%</output></span>
+              <input id="noise" name="noise" type="range" min="0" max="20" step="0.5" value="0.5" />
             </label>
             <label class="range-field">
-              <span>Snow refresh <output id="refresh-value">12%</output></span>
-              <input id="refresh" name="refresh" type="range" min="0" max="100" value="12" />
+              <span>Snow refresh <output id="refresh-value">4%</output></span>
+              <input id="refresh" name="refresh" type="range" min="0" max="100" value="4" />
             </label>
             <label class="range-field">
               <span>Snow grain <output id="grain-value">2 px</output></span>
               <input id="grain" name="grain" type="range" min="1" max="6" value="2" />
             </label>
             <label class="range-field">
-              <span>Character jitter <output id="jitter-value">1</output></span>
-              <input id="jitter" name="jitter" type="range" min="0" max="3" value="1" />
+              <span>Character jitter <output id="jitter-value">0</output></span>
+              <input id="jitter" name="jitter" type="range" min="0" max="3" value="0" />
+            </label>
+            <label class="range-field">
+              <span>Signal spread <output id="spread-value">1 grain</output></span>
+              <input id="spread" name="spread" type="range" min="0" max="2" value="1" />
+            </label>
+            <label class="range-field">
+              <span>Quiet zone <output id="quiet-zone-value">1 grain</output></span>
+              <input id="quiet-zone" name="quiet-zone" type="range" min="0" max="4" value="1" />
             </label>
           </fieldset>
 
