@@ -1,7 +1,7 @@
 {
   "name": "afterimage-captcha",
   "version": "0.1.0",
-  "description": "Generate display-synced Canvas captchas from complementary television snow frames.",
+  "description": "A captcha generator that utilizes the principle of persistence of vision.",
   "type": "module",
   "exports": {
     ".": {
