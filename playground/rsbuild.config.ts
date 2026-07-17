@@ -6,6 +6,7 @@ export default defineConfig({
     title: 'Afterimage Captcha Playground',
   },
   output: {
+    assetPrefix: '/afterimage-captcha/',
     target: 'web',
   },
   server: {
