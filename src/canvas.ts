@@ -2,7 +2,7 @@ import type {
   CaptchaPlayer,
   CaptchaPlayerOptions,
   CaptchaResult,
-} from './types';
+} from './types.js';
 
 const MIN_REFRESH_SAMPLES = 12;
 const MAX_REFRESH_SAMPLES = 60;

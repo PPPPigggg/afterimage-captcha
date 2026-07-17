@@ -1,8 +1,9 @@
 {
   "name": "afterimage-captcha",
   "version": "0.1.0",
-  "description": "A captcha generator that utilizes the principle of persistence of vision.",
+  "description": "A dependency-free, display-synced Canvas CAPTCHA using visual persistence and complementary noise frames.",
   "type": "module",
+  "packageManager": "pnpm@10.21.0",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -25,12 +26,22 @@
     "ocr",
     "visual-persistence"
   ],
+  "author": "PPPPigggg",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PPPPigggg/afterimage-captcha.git"
+  },
+  "homepage": "https://ppppigggg.github.io/afterimage-captcha/",
+  "bugs": {
+    "url": "https://github.com/PPPPigggg/afterimage-captcha/issues"
+  },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build": "rslib",
@@ -40,7 +51,8 @@
     "format": "biome format --write",
     "lint": "biome check .",
     "playground": "pnpm --dir playground dev",
-    "playground:build": "pnpm --dir playground build"
+    "playground:build": "pnpm --dir playground build",
+    "prepublishOnly": "pnpm run lint && pnpm run build"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",

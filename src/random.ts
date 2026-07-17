@@ -1,4 +1,4 @@
-import { CaptchaOptionError, type RandomSource } from './types';
+import { CaptchaOptionError, type RandomSource } from './types.js';
 
 const defaultRandomSource: RandomSource = (byteLength) => {
   if (!globalThis.crypto?.getRandomValues) {

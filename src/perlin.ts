@@ -1,4 +1,4 @@
-import type { RandomPool } from './random';
+import type { RandomPool } from './random.js';
 
 const fade = (value: number): number =>
   value * value * value * (value * (value * 6 - 15) + 10);

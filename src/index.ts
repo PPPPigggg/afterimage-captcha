@@ -1,10 +1,10 @@
-import { createCanvasPlayer } from './canvas';
-import { renderCaptcha } from './render';
-import type { Captcha, CaptchaOptions, CaptchaResult } from './types';
+import { createCanvasPlayer } from './canvas.js';
+import { renderCaptcha } from './render.js';
+import type { Captcha, CaptchaOptions, CaptchaResult } from './types.js';
 
-export { DEFAULT_CHARSET } from './glyphs';
-export type { Captcha, CaptchaOptions, RandomSource } from './types';
-export { CaptchaOptionError } from './types';
+export { DEFAULT_CHARSET } from './glyphs.js';
+export type { Captcha, CaptchaOptions, RandomSource } from './types.js';
+export { CaptchaOptionError } from './types.js';
 
 export const createCaptcha = (
   canvas: HTMLCanvasElement,

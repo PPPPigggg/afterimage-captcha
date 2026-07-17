@@ -1,12 +1,12 @@
-import { type BitmapGlyph, BUILTIN_GLYPHS, DEFAULT_CHARSET } from './glyphs';
-import { coherentProbability, PerlinNoise2D } from './perlin';
-import { RandomPool } from './random';
+import { type BitmapGlyph, BUILTIN_GLYPHS, DEFAULT_CHARSET } from './glyphs.js';
+import { coherentProbability, PerlinNoise2D } from './perlin.js';
+import { RandomPool } from './random.js';
 import {
   type CaptchaFrame,
   CaptchaOptionError,
   type CaptchaOptions,
   type RgbaColor,
-} from './types';
+} from './types.js';
 
 interface ResolvedOptions {
   answer: string;
