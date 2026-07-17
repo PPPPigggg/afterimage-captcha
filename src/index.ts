@@ -1,34 +1,43 @@
-export { createCaptchaPlayer } from './canvas';
-
+import { createCanvasPlayer } from './canvas';
 import { renderCaptcha } from './render';
-import type { CaptchaOptions, CaptchaResult } from './types';
+import type { Captcha, CaptchaOptions, CaptchaResult } from './types';
 
 export { DEFAULT_CHARSET } from './glyphs';
-export type {
-  BitmapGlyph,
-  CaptchaCanvasPlayer,
-  CaptchaCanvasPlayerOptions,
-  CaptchaFrame,
-  CaptchaOptions,
-  CaptchaResult,
-  GlyphMap,
-  RandomSource,
-  RgbaColor,
-} from './types';
+export type { Captcha, CaptchaOptions, RandomSource } from './types';
 export { CaptchaOptionError } from './types';
 
-export const generateCaptcha = (
+export const createCaptcha = (
+  canvas: HTMLCanvasElement,
   options: CaptchaOptions = {},
-): CaptchaResult => {
+): Captcha => {
   const rendered = renderCaptcha(options);
   const { width, height, frameCount, palette, answer } = rendered.options;
-
-  return {
+  const result: CaptchaResult = {
     answer,
     width,
     height,
     frameCount,
     palette,
     frames: rendered.frames,
+  };
+  const player = createCanvasPlayer(canvas, result, options);
+
+  return {
+    answer,
+    get refreshRate() {
+      return player.refreshRate;
+    },
+    get running() {
+      return player.running;
+    },
+    start() {
+      player.start();
+    },
+    stop() {
+      player.stop();
+    },
+    destroy() {
+      player.destroy();
+    },
   };
 };

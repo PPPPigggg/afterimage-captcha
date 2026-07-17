@@ -1,10 +1,10 @@
-import type { BitmapGlyph, GlyphMap } from './types';
+export type BitmapGlyph = readonly string[];
 
 const glyph = (...rows: string[]): BitmapGlyph => rows;
 
 export const DEFAULT_CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-export const BUILTIN_GLYPHS: GlyphMap = {
+export const BUILTIN_GLYPHS: Readonly<Record<string, BitmapGlyph>> = {
   A: glyph('01110', '10001', '10001', '11111', '10001', '10001', '10001'),
   B: glyph('11110', '10001', '10001', '11110', '10001', '10001', '11110'),
   C: glyph('01111', '10000', '10000', '10000', '10000', '10000', '01111'),

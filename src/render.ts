@@ -1,12 +1,10 @@
-import { BUILTIN_GLYPHS, DEFAULT_CHARSET } from './glyphs';
+import { type BitmapGlyph, BUILTIN_GLYPHS, DEFAULT_CHARSET } from './glyphs';
 import { coherentProbability, PerlinNoise2D } from './perlin';
 import { RandomPool } from './random';
 import {
-  type BitmapGlyph,
   type CaptchaFrame,
   CaptchaOptionError,
   type CaptchaOptions,
-  type GlyphMap,
   type RgbaColor,
 } from './types';
 
@@ -32,9 +30,6 @@ interface ResolvedOptions {
 export interface RenderOutput {
   options: ResolvedOptions;
   frames: CaptchaFrame[];
-  pairDifferenceMasks: Uint8Array[];
-  compositeSignalMask: Uint8Array;
-  stabilityMask: Uint8Array;
 }
 
 const integerOption = (
@@ -81,41 +76,6 @@ const parseColor = (value: string, name: string): RgbaColor => {
   ];
 };
 
-const validateGlyph = (character: string, glyph: BitmapGlyph): BitmapGlyph => {
-  if (glyph.length < 1 || glyph.length > 32) {
-    throw new CaptchaOptionError(
-      `Glyph ${JSON.stringify(character)} must have 1 to 32 rows.`,
-    );
-  }
-  const width = glyph[0]?.length ?? 0;
-  if (
-    width < 1 ||
-    width > 32 ||
-    glyph.some((row) => row.length !== width || !/^[01]+$/.test(row))
-  ) {
-    throw new CaptchaOptionError(
-      `Glyph ${JSON.stringify(character)} must be a rectangular bitmap made of 0 and 1 characters.`,
-    );
-  }
-  return glyph;
-};
-
-const buildGlyphMap = (
-  customGlyphs: GlyphMap | undefined,
-): Map<string, BitmapGlyph> => {
-  const glyphs = new Map(Object.entries(BUILTIN_GLYPHS));
-  if (!customGlyphs) return glyphs;
-  for (const [character, value] of Object.entries(customGlyphs)) {
-    if (Array.from(character).length !== 1) {
-      throw new CaptchaOptionError(
-        'Each glyph key must contain exactly one Unicode character.',
-      );
-    }
-    glyphs.set(character, validateGlyph(character, value));
-  }
-  return glyphs;
-};
-
 const randomText = (
   characters: readonly string[],
   length: number,
@@ -132,7 +92,7 @@ const resolveOptions = (
   options: CaptchaOptions,
   random: RandomPool,
 ): ResolvedOptions => {
-  const glyphMap = buildGlyphMap(options.glyphs);
+  const glyphMap = new Map(Object.entries(BUILTIN_GLYPHS));
   const charset = Array.from(options.charset ?? DEFAULT_CHARSET);
   if (charset.length < 2 || charset.length > 128) {
     throw new CaptchaOptionError(
@@ -163,7 +123,7 @@ const resolveOptions = (
         `No glyph is available for text character ${JSON.stringify(character)}.`,
       );
     }
-    return validateGlyph(character, value);
+    return value;
   });
 
   const width = integerOption('width', options.width ?? 220, 32, 1024);
@@ -402,13 +362,11 @@ export const renderCaptcha = (options: CaptchaOptions = {}): RenderOutput => {
     resolved.signalQuietZone,
   );
   const frames: CaptchaFrame[] = [];
-  const pairDifferenceMasks: Uint8Array[] = [];
   const baseSnow = new Uint8Array(width * height);
 
   for (let pairIndex = 0; pairIndex < frameCount / 2; pairIndex += 1) {
     const first = new Uint8Array(width * height);
     const second = new Uint8Array(width * height);
-    const differenceMask = new Uint8Array(width * height);
 
     for (let y = 0; y < height; y += grainSize) {
       for (let x = 0; x < width; x += grainSize) {
@@ -457,19 +415,14 @@ export const renderCaptcha = (options: CaptchaOptions = {}): RenderOutput => {
           grainSize,
           flip ? 1 - base : base,
         );
-        if (flip) fillBlock(differenceMask, width, height, x, y, grainSize, 1);
       }
     }
 
     frames.push({ pixels: first }, { pixels: second });
-    pairDifferenceMasks.push(differenceMask);
   }
 
   return {
     options: resolved,
     frames,
-    pairDifferenceMasks,
-    compositeSignalMask,
-    stabilityMask,
   };
 };

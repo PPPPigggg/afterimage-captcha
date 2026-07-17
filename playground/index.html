@@ -1,137 +1,166 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#e9edf0" />
-    <title>Afterimage Captcha Lab</title>
-  </head>
-  <body>
-    <header class="topbar">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">AC</span>
-        <span>
-          <strong>Afterimage</strong>
-          <small>Canvas captcha lab</small>
-        </span>
-      </div>
-      <output class="status" id="status" aria-live="polite">Ready</output>
-    </header>
+<html lang="zh-CN">
 
-    <main class="workspace">
-      <section class="preview-pane" aria-label="Captcha preview">
-        <div class="preview-heading">
-          <div>
-            <p class="eyebrow">Live output</p>
-            <h1>Persistence viewer</h1>
-          </div>
-          <div class="answer-readout">
-            <span>Answer</span>
-            <strong id="answer">-----</strong>
-          </div>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Afterimage CAPTCHA</title>
+</head>
 
-        <div class="display-shell">
-          <div class="display-labels" aria-hidden="true">
-            <span id="mode-label">DISPLAY-SYNCED CANVAS</span>
-            <span id="dimensions-label">220 x 80</span>
-          </div>
-          <div class="captcha-stage">
-            <canvas id="captcha-preview" aria-label="Generated animated captcha"></canvas>
-          </div>
-          <div class="transport">
-            <div class="segmented" aria-label="Preview mode">
-              <button class="mode-button active" type="button" data-mode="animated" aria-pressed="true">
-                Animated
-              </button>
-              <button class="mode-button" type="button" data-mode="frame" aria-pressed="false">
-                Single frame
-              </button>
-            </div>
-            <div class="frame-nav" id="frame-nav" hidden>
-              <button type="button" class="icon-button" id="previous-frame" title="Previous frame" aria-label="Previous frame">&larr;</button>
-              <output id="frame-counter">01 / 08</output>
-              <button type="button" class="icon-button" id="next-frame" title="Next frame" aria-label="Next frame">&rarr;</button>
-            </div>
-          </div>
-        </div>
+<body>
+  <main>
+    <h1>Afterimage CAPTCHA</h1>
 
-        <dl class="metrics">
-          <div><dt>Frames</dt><dd id="metric-frames">8</dd></div>
-          <div><dt>Refresh</dt><dd id="metric-refresh">Detecting</dd></div>
-          <div><dt>Reveal</dt><dd id="metric-signal">100%</dd></div>
-          <div><dt>Driver</dt><dd id="metric-driver">rAF</dd></div>
-        </dl>
-
-        <div class="commands">
-          <button class="primary-command" id="regenerate" type="button">Regenerate</button>
-        </div>
+    <div class="layout">
+      <section class="preview" aria-labelledby="preview-title">
+        <h2 id="preview-title">预览 / Preview</h2>
+        <canvas id="captcha" aria-label="动态验证码 / Animated CAPTCHA"></canvas>
+        <p>状态 / Status：<output id="status" aria-live="polite">准备中 / Ready</output></p>
+        <p>答案 / Answer：<output id="answer">-</output></p>
+        <p>刷新率 / Refresh rate：<output id="refresh-rate">检测中 / Detecting</output></p>
+        <p id="error" role="alert" hidden></p>
       </section>
 
-      <aside class="control-pane" aria-label="Captcha options">
-        <form id="options-form">
+      <section class="options" aria-labelledby="options-title">
+        <h2 id="options-title">参数 / Options</h2>
+
+        <form id="form">
           <fieldset>
-            <legend>Code</legend>
-            <label>
-              <span>Text <small>blank = random</small></span>
-              <input id="text" name="text" maxlength="12" autocomplete="off" spellcheck="false" placeholder="R7K2M" />
-            </label>
-            <div class="split-fields">
-              <label><span>Width</span><input id="width" name="width" type="number" min="120" max="500" value="220" /></label>
-              <label><span>Height</span><input id="height" name="height" type="number" min="48" max="240" value="80" /></label>
-            </div>
+            <legend>内容 / Content</legend>
+            <p class="wide">
+              <label for="text">文本 / Text</label>
+              <input id="text" name="text" maxlength="32" autocomplete="off" />
+            </p>
+            <p>
+              <label for="length">
+                随机长度 / Length
+                <output id="length-value" for="length">5</output>
+              </label>
+              <input id="length" name="length" type="range" min="1" max="12" value="5" />
+            </p>
+            <p class="wide">
+              <label for="charset">候选字符 / Character set</label>
+              <input id="charset" name="charset" maxlength="128" value="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+                autocomplete="off" />
+            </p>
           </fieldset>
 
           <fieldset>
-            <legend>Animation</legend>
-            <label class="range-field">
-              <span>Frames <output id="frames-value">8</output></span>
-              <input id="frames" name="frames" type="range" min="4" max="16" step="2" value="8" />
-            </label>
-            <label class="range-field">
-              <span>Signal strength <output id="strength-value">100%</output></span>
-              <input id="strength" name="strength" type="range" min="25" max="100" value="100" />
-            </label>
+            <legend>画布与字符 / Canvas &amp; Characters</legend>
+            <p>
+              <label for="width">
+                宽度 / Width
+                <output id="width-value" for="width">220</output>
+              </label>
+              <input id="width" name="width" type="range" min="32" max="1024" value="220" />
+            </p>
+            <p>
+              <label for="height">
+                高度 / Height
+                <output id="height-value" for="height">80</output>
+              </label>
+              <input id="height" name="height" type="range" min="32" max="1024" value="80" />
+            </p>
+            <p>
+              <label for="padding">
+                边距 / Padding
+                <output id="padding-value" for="padding">8</output>
+              </label>
+              <input id="padding" name="padding" type="range" min="0" max="26" value="8" />
+            </p>
+            <p>
+              <label for="scale">
+                缩放 / Scale
+                <output id="scale-value" for="scale">自动 / Auto</output>
+              </label>
+              <input id="scale" name="scale" type="range" min="0" max="32" value="0" />
+            </p>
+            <p>
+              <label for="character-spacing">
+                字符间距 / Spacing
+                <output id="character-spacing-value" for="character-spacing">2</output>
+              </label>
+              <input id="character-spacing" name="characterSpacing" type="range" min="0" max="16" value="2" />
+            </p>
+            <p>
+              <label for="character-jitter">
+                字符抖动 / Jitter
+                <output id="character-jitter-value" for="character-jitter">0</output>
+              </label>
+              <input id="character-jitter" name="characterJitter" type="range" min="0" max="4" value="0" />
+            </p>
           </fieldset>
 
           <fieldset>
-            <legend>Interference</legend>
-            <label class="range-field">
-              <span>Temporal noise <output id="noise-value">0.5%</output></span>
-              <input id="noise" name="noise" type="range" min="0" max="20" step="0.5" value="0.5" />
-            </label>
-            <label class="range-field">
-              <span>Snow refresh <output id="refresh-value">4%</output></span>
-              <input id="refresh" name="refresh" type="range" min="0" max="100" value="4" />
-            </label>
-            <label class="range-field">
-              <span>Snow grain <output id="grain-value">2 px</output></span>
-              <input id="grain" name="grain" type="range" min="1" max="6" value="2" />
-            </label>
-            <label class="range-field">
-              <span>Character jitter <output id="jitter-value">0</output></span>
-              <input id="jitter" name="jitter" type="range" min="0" max="3" value="0" />
-            </label>
-            <label class="range-field">
-              <span>Signal spread <output id="spread-value">1 grain</output></span>
-              <input id="spread" name="spread" type="range" min="0" max="2" value="1" />
-            </label>
-            <label class="range-field">
-              <span>Quiet zone <output id="quiet-zone-value">1 grain</output></span>
-              <input id="quiet-zone" name="quiet-zone" type="range" min="0" max="4" value="1" />
-            </label>
+            <legend>动画与信号 / Animation &amp; Signal</legend>
+            <p>
+              <label for="frames">
+                循环帧数 / Sequence frames
+                <output id="frames-value" for="frames">8</output>
+              </label>
+              <input id="frames" name="frameCount" type="range" min="4" max="32" step="2" value="8" />
+            </p>
+            <p>
+              <label for="grain-size">
+                颗粒大小 / Grain size
+                <output id="grain-size-value" for="grain-size">2</output>
+              </label>
+              <input id="grain-size" name="grainSize" type="range" min="1" max="8" value="2" />
+            </p>
+            <p>
+              <label for="signal-strength">
+                信号强度 / Signal strength
+                <output id="signal-strength-value" for="signal-strength">1</output>
+              </label>
+              <input id="signal-strength" name="signalStrength" type="range" min="0.25" max="1" step="0.05" value="1" />
+            </p>
+            <p>
+              <label for="signal-spread">
+                笔画扩展 / Signal spread
+                <output id="signal-spread-value" for="signal-spread">1</output>
+              </label>
+              <input id="signal-spread" name="signalSpread" type="range" min="0" max="2" value="1" />
+            </p>
+            <p>
+              <label for="signal-quiet-zone">
+                信号稳定区 / Quiet zone
+                <output id="signal-quiet-zone-value" for="signal-quiet-zone">1</output>
+              </label>
+              <input id="signal-quiet-zone" name="signalQuietZone" type="range" min="0" max="4" value="1" />
+            </p>
+            <p>
+              <label for="temporal-noise">
+                时序噪声 / Temporal noise
+                <output id="temporal-noise-value" for="temporal-noise">0.005</output>
+              </label>
+              <input id="temporal-noise" name="temporalNoiseDensity" type="range" min="0" max="0.5" step="0.001"
+                value="0.005" />
+            </p>
+            <p>
+              <label for="snow-refresh">
+                雪花刷新率 / Snow refresh rate
+                <output id="snow-refresh-value" for="snow-refresh">0.04</output>
+              </label>
+              <input id="snow-refresh" name="snowRefreshRate" type="range" min="0" max="1" step="0.01" value="0.04" />
+            </p>
           </fieldset>
 
           <fieldset>
-            <legend>Palette</legend>
-            <div class="color-grid">
-              <label><span>Dark snow</span><input id="dark-color" type="color" value="#0a0d0e" /></label>
-              <label><span>Light snow</span><input id="light-color" type="color" value="#eef2f3" /></label>
-            </div>
+            <legend>颜色 / Colors</legend>
+            <p>
+              <label for="dark-color">暗色 / Dark</label>
+              <input id="dark-color" name="darkColor" type="color" value="#0a0d0e" />
+            </p>
+            <p>
+              <label for="light-color">亮色 / Light</label>
+              <input id="light-color" name="lightColor" type="color" value="#eef2f3" />
+            </p>
           </fieldset>
+
         </form>
-        <p class="error-message" id="error-message" role="alert" hidden></p>
-      </aside>
-    </main>
-  </body>
+      </section>
+    </div>
+  </main>
+</body>
+
 </html>

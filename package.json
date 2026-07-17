@@ -14,7 +14,8 @@
   "files": [
     "dist",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "README.zh-CN.md"
   ],
   "keywords": [
     "captcha",
@@ -39,15 +40,11 @@
     "format": "biome format --write",
     "lint": "biome check .",
     "playground": "pnpm --dir playground dev",
-    "playground:build": "pnpm --dir playground build",
-    "test": "rstest run",
-    "test:watch": "rstest --watch"
+    "playground:build": "pnpm --dir playground build"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
     "@rslib/core": "^0.23.2",
-    "@rstest/adapter-rslib": "^0.10.6",
-    "@rstest/core": "^0.10.6",
     "@types/node": "^24.13.2",
     "typescript": "^6.0.3"
   }

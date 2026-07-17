@@ -1,6 +1,6 @@
 import type {
-  CaptchaCanvasPlayer,
-  CaptchaCanvasPlayerOptions,
+  CaptchaPlayer,
+  CaptchaPlayerOptions,
   CaptchaResult,
 } from './types';
 
@@ -14,11 +14,11 @@ const median = (values: readonly number[]): number => {
   return ((sorted[middle - 1] as number) + (sorted[middle] as number)) / 2;
 };
 
-export const createCaptchaPlayer = (
+export const createCanvasPlayer = (
   canvas: HTMLCanvasElement,
   captcha: CaptchaResult,
-  options: CaptchaCanvasPlayerOptions = {},
-): CaptchaCanvasPlayer => {
+  options: CaptchaPlayerOptions = {},
+): CaptchaPlayer => {
   canvas.width = captcha.width;
   canvas.height = captcha.height;
   const context = canvas.getContext('2d');
@@ -78,10 +78,7 @@ export const createCaptchaPlayer = (
     animationFrameId = globalThis.requestAnimationFrame(tick);
   };
 
-  const player: CaptchaCanvasPlayer = {
-    get currentFrame() {
-      return currentFrame;
-    },
+  const player: CaptchaPlayer = {
     get refreshRate() {
       return refreshRate;
     },
@@ -107,12 +104,6 @@ export const createCaptchaPlayer = (
         globalThis.cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
       }
-    },
-    drawFrame(frameIndex) {
-      if (!Number.isInteger(frameIndex)) {
-        throw new RangeError('frameIndex must be an integer.');
-      }
-      renderFrame(frameIndex);
     },
     destroy() {
       player.stop();
